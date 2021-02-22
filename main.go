@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -38,6 +39,7 @@ var netTransport = &http.Transport{
 		Timeout: 5 * time.Second,
 	}).Dial,
 	TLSHandshakeTimeout: 5 * time.Second,
+	TLSClientConfig:     &tls.Config{InsecureSkipVerify: false},
 }
 var netClient = &http.Client{
 	Timeout:   time.Second * 10,
@@ -117,10 +119,15 @@ func main() {
 	serve := flag.Bool("serve", false, "run the http server")
 	subject := flag.String("sub", "", "the nats subject to listen on/send to")
 	forward := flag.Bool("forward", false, "forward nats messages to an http server")
+	insecureSkipVerify := flag.Bool("insecureSkipVerify", false, "")
 	remoteURL := flag.String("to", "", "the remote http server")
 	nurl := flag.String("nurl", nats.DefaultURL, "the nats cluster url")
 	ncreds := flag.String("creds", "", "the path to the nats credentials")
 	flag.Parse()
+
+	if *insecureSkipVerify {
+		netTransport.TLSClientConfig.InsecureSkipVerify = true
+	}
 
 	nc, err := nats.Connect(*nurl, nats.UserCredentials(*ncreds))
 	if err != nil {
