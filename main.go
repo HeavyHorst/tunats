@@ -123,13 +123,14 @@ func main() {
 	remoteURL := flag.String("to", "", "the remote http server")
 	nurl := flag.String("nurl", nats.DefaultURL, "the nats cluster url")
 	ncreds := flag.String("creds", "", "the path to the nats credentials")
+	nname := flag.String("nats_name", "", "nats connection name")
 	flag.Parse()
 
 	if *insecureSkipVerify {
 		netTransport.TLSClientConfig.InsecureSkipVerify = true
 	}
 
-	nc, err := nats.Connect(*nurl, nats.UserCredentials(*ncreds))
+	nc, err := nats.Connect(*nurl, nats.UserCredentials(*ncreds), nats.Name(*nname))
 	if err != nil {
 		panic(err)
 	}
